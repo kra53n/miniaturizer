@@ -1,5 +1,8 @@
-from os import walk
 from time import strftime
+
+from os import walk
+from os import getcwd
+import os.path
 
 from yaml import load
 from yaml import dump
@@ -20,6 +23,11 @@ def open_file(filename):
         date = load(f)
     return date
 
+def matrix_to_list(matrix):
+    lst = []
+    for i in matrix:
+        lst.extend(i)
+    return lst
 
 class Cli:
     def __init__(self):
@@ -30,17 +38,26 @@ class Cli:
             print("I create data")
 
     def __parse_yaml_extensions(self):
-        pass
+        # names of dirs that you want to skip
+        skip_dir = (
+            ".git",
+        )
+        paths = []
+        return paths
 
     def __process_file(self):
         try:
-            return open_file()
+            #self.__parse_yaml_extensions()
+            return open_file("sdfg")
         except FileNotFoundError:
-            data = get_date()
-            data.update(self.__setup_config())
-            self.filename = data["title"]
-            create_file(data, filename=self.filename)
-            return 0
+            self.__create_file()
+
+    def __create_file(self):
+        data = get_date()
+        data.update(self.__setup_config())
+        self.filename = data["title"].lower() + ".yaml"
+        create_file(data, filename=self.filename)
+        #return 0
 
     def __setup_config(self):
         title = input("What title of limit you want? ")
