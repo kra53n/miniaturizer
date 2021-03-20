@@ -31,7 +31,7 @@ def matrix_to_list(matrix):
 
 
 class Yaml:
-    def __parse_files(self, path):
+    def __parse_files(path):
         """
         Arguments:
             path - path to directory
@@ -51,58 +51,28 @@ class Yaml:
                     paths.append(os.path.join(root, fl))
         return paths
 
-    def parse_yaml_extensions(self, path):
+    def parse_yaml_extensions(path):
         """
         Arguments:
             path - path to directory
         """
         ext = ".yaml"
-        files = self.__parse_files(path)
+        files = Yaml.__parse_files(path)
         files = [i for i in files if i[len(i)-len(ext):] == ext]
         return files
 
 
 class Cli:
     def __init__(self):
-        data = self.__process_file()
+        data = self.__processing_file()
         if data:
             print(data)
         if not data:
             print("I create data")
 
-    def __parse_files(self, path):
-        """
-        Arguments:
-            path - path to directory
-        """
-        # names of dirs that you want to skip
-        skip_dir = (
-            ".git",
-        )
-        paths = []
-        for root, dirs, files in walk(path):
-            skip = False
-            for skip_item in skip_dir:
-                if skip_item in root[len(path):]:
-                    skip = True
-            if not skip:
-                for fl in files:
-                    paths.append(os.path.join(root, fl))
-        return paths
-
-    def __parse_yaml_extensions(self, path):
-        """
-        Arguments:
-            path - path to directory
-        """
-        ext = ".yaml"
-        files = self.__parse_files(path)
-        files = [i for i in files if i[len(i)-len(ext):] == ext]
-        return files
-
-    def __process_file(self):
+    def __processing_file(self):
         try:
-            files = self.__parse_yaml_extensions(getcwd())
+            files = Yaml.parse_yaml_extensions(getcwd())
             filename = ""
             if len(files) == 1:
                 filename = files[0]
@@ -119,7 +89,6 @@ class Cli:
         data.update(self.__setup_config())
         self.filename = data["title"].lower() + ".yaml"
         create_file(data, filename=self.filename)
-        #return 0
 
     def __setup_config(self):
         title = input("What title of limit you want? ")
