@@ -31,6 +31,9 @@ def matrix_to_list(matrix):
 
 
 class Yaml:
+    """
+    Working with yaml file formats
+    """
     def __parse_files(path):
         """
         Arguments:
@@ -62,20 +65,41 @@ class Yaml:
         return files
 
 
+class Data:
+    """
+    Manipulation with data from `*.yaml` files
+    """
+    pass
+
+
 class Cli:
-    def __init__(self):
-        data = self.__processing_file()
+    def __init__(self, path):
+        data = self.__processing_file(path)
         if data:
             print(data)
         if not data:
-            print("I create data")
+            data = self.__processing_file(path)
+            self.__notify("File %s was created" % (
+                data["title"].lower() + ".yaml"))
 
-    def __processing_file(self):
+    def __notify(self, text):
+        print(":: " + text)
+
+    def __processing_file(self, path):
         try:
-            files = Yaml.parse_yaml_extensions(getcwd())
+            files = Yaml.parse_yaml_extensions(path)
             filename = ""
             if len(files) == 1:
-                filename = files[0]
+                fl = files[0]
+                print("Choose option:")
+                message = "1. Open {}\n".format(fl)
+                message += "2. Create new limiter\n"
+                option = int(input(message + "Enter your option: "))
+                if option == 1:
+                    self.__notify("Open %s file" % (fl + ".yaml"))
+                    filename = fl
+                if option == 2:
+                    self.__create_file()
             if len(files) > 1:
                 print("Choose enter:")
                 [print("\t".format(i+1, files[i])) for i in range(len(files))]
@@ -94,7 +118,7 @@ class Cli:
         title = input("What title of limit you want? ")
         limit = int(input("What the maximum in your limit? "))
         step = int(input("What the step that will reduce your limit? "))
-        period = int(input("What period it will be changed? "))
+        period = int(input("What period it will be changed?(days) "))
         return {
         "title": title,
         "limit": limit,
@@ -104,4 +128,5 @@ class Cli:
 
 
 if __name__ == "__main__":
-    Cli()
+    path = getcwd()
+    Cli(path)
