@@ -106,7 +106,7 @@ class Cli:
         filename = ""
         if len(files) == 0:
             self.__create_file()
-            self.__processing_file(path)
+            return "update"
         if len(files) > 0:
             print("Choose option:")
             for i in range(len(files)):
