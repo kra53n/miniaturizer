@@ -44,6 +44,7 @@ class Yaml:
             ".git",
         )
         paths = []
+        fls = []
         for root, dirs, files in walk(path):
             skip = False
             for skip_item in skip_dir:
@@ -52,7 +53,8 @@ class Yaml:
             if not skip:
                 for fl in files:
                     paths.append(os.path.join(root, fl))
-        return paths
+                    fls.append(fl)
+        return paths, fls
 
     def parse_yaml_extensions(path):
         """
@@ -60,9 +62,20 @@ class Yaml:
             path - path to directory
         """
         ext = ".yaml"
-        files = Yaml.__parse_files(path)
+        paths, files = Yaml.__parse_files(path)
+        paths = [i for i in paths if i[len(i)-len(ext):] == ext]
         files = [i for i in files if i[len(i)-len(ext):] == ext]
-        return files
+        return paths, files
+
+    def create_file(data, name):
+        """
+        Create file with name in lowercase with `.yaml` extension
+        Arguments:
+            0) data - data that you want to load
+            0) name - name of file without extension
+        """
+        name = name.lower() + ".yaml"
+        create_file(data, name)
 
 
 class Data:
@@ -75,44 +88,45 @@ class Data:
 class Cli:
     def __init__(self, path):
         data = self.__processing_file(path)
+        if data == "update":
+            data = self.__processing_file(path)
         if data:
             print(data)
-        if not data:
-            data = self.__processing_file(path)
-            self.__notify("File %s was created" % (
-                data["title"].lower() + ".yaml"))
 
     def __notify(self, text):
         print(":: " + text)
 
     def __processing_file(self, path):
-        try:
-            files = Yaml.parse_yaml_extensions(path)
-            filename = ""
-            if len(files) == 1:
-                fl = files[0]
-                print("Choose option:")
-                message = "1. Open {}\n".format(fl)
-                message += "2. Create new limiter\n"
-                option = int(input(message + "Enter your option: "))
-                if option == 1:
-                    self.__notify("Open %s file" % (fl + ".yaml"))
-                    filename = fl
-                if option == 2:
-                    self.__create_file()
-            if len(files) > 1:
-                print("Choose enter:")
-                [print("\t".format(i+1, files[i])) for i in range(len(files))]
-                filename = files[int(input(print("Your enter: "))) - 1]
-            return open_file(filename)
-        except FileNotFoundError:
+        """
+        Arguments:
+         0) path - path to working directory
+        """
+        paths, files = Yaml.parse_yaml_extensions(path)
+        filename = ""
+        if len(files) == 0:
             self.__create_file()
+            self.__processing_file(path)
+        if len(files) > 0:
+            print("Choose option:")
+            for i in range(len(files)):
+                print("\t{}. {}".format(i+1, files[i]))
+            print("\t{}. Create new limiter".format(len(files)+1))
+            option = int(input("Enter your option: "))
+            if option == (len(files) + 1):
+                self.__create_file()
+                return "update"
+            path = paths[option-1]
+        return open_file(path)
+
+        self.__create_file()
 
     def __create_file(self):
+        self.__notify("Creating file")
         data = get_date()
         data.update(self.__setup_config())
-        self.filename = data["title"].lower() + ".yaml"
-        create_file(data, filename=self.filename)
+        Yaml.create_file(data, data["title"])
+        self.__notify("File %s was created" % (
+            data["title"].lower() + ".yaml"))
 
     def __setup_config(self):
         title = input("What title of limit you want? ")
