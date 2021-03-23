@@ -78,8 +78,9 @@ class Yaml:
         create_file(data, name)
 
 
-class Data:
+class Manda:
     """
+    Manda - manipulation data
     Manipulation with data from `*.yaml` files
     """
     pass
