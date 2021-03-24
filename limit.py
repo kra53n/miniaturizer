@@ -92,13 +92,10 @@ class Dama:
     Manipulation with data from `*.yaml` files
     """
     def create_file(self):
-        #Cli.notify("Creating file")
         data = get_date()
         data.update(self.setup_config())
         Yaml.create_file(data, data["title"])
         return data
-        #Cli.notify("File %s was created" % (
-        #    data["title"].lower() + ".yaml"))
 
     def setup_config(self):
         title = input("What title of limit you want? ")
@@ -111,6 +108,21 @@ class Dama:
         "step": step,
         "period":period,
         }
+
+    def show_info(self, path):
+        """
+        Arguments:
+         0) path - path to working directory
+        """
+        paths, files = Yaml.parse_yaml_extensions(path)
+        filename = ""
+        if len(files) == 0:
+            print("You don`t have any `yaml` files")
+            return 0
+        if len(files) > 0:
+            print("Choose limiter:")
+            for i in range(len(files)):
+                print("\t{}. {}".format(i+1, files[i]))
 
 
 class Cli:
@@ -139,7 +151,7 @@ class Cli:
             #Dama().create_file()
             self.__creating_file()
         if options[option] == "show info":
-            self.__show_info(self.path)
+            Dama().show_info(self.path)
 
     def __creating_file(self):
         self.__notify("Creating file")
@@ -150,26 +162,26 @@ class Cli:
     def __notify(self, text):
         print(":: " + text)
 
-    def __show_info(self, path):
-        """
-        Arguments:
-         0) path - path to working directory
-        """
-        paths, files = Yaml.parse_yaml_extensions(path)
-        filename = ""
-        if len(files) == 0:
-            print("You don`t have any `yaml` files")
-            return 0
-        if len(files) > 0:
-            print("Choose limiter:")
-            for i in range(len(files)):
-                print("\t{}. {}".format(i+1, files[i]))
-       #     option = int(input("Enter your option: "))
-       #     if option == (len(files) + 1):
-       #         self.__create_file()
-       #         return "update"
-       #     path = paths[option-1]
-       # return open_file(path)
+    #def __show_info(self, path):
+    #    """
+    #    Arguments:
+    #     0) path - path to working directory
+    #    """
+    #    paths, files = Yaml.parse_yaml_extensions(path)
+    #    filename = ""
+    #    if len(files) == 0:
+    #        print("You don`t have any `yaml` files")
+    #        return 0
+    #    if len(files) > 0:
+    #        print("Choose limiter:")
+    #        for i in range(len(files)):
+    #            print("\t{}. {}".format(i+1, files[i]))
+    #        option = int(input("Enter your option: "))
+    #        if option == (len(files) + 1):
+    #            self.__create_file()
+    #            return "update"
+    #        path = paths[option-1]
+    #    return open_file(path)
 
 
 if __name__ == "__main__":
