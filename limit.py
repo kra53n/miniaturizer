@@ -30,6 +30,14 @@ def matrix_to_list(matrix):
     return lst
 
 
+class Settings:
+    menu_options_list = (
+        "edit",
+        "create",
+        "show info",
+    )
+
+
 class Yaml:
     """
     Working with yaml file formats
@@ -78,9 +86,9 @@ class Yaml:
         create_file(data, name)
 
 
-class Manda:
+class Dama:
     """
-    Manda - manipulation data
+    Dama - data manipulation
     Manipulation with data from `*.yaml` files
     """
     pass
@@ -88,16 +96,35 @@ class Manda:
 
 class Cli:
     def __init__(self, path):
-        data = self.__processing_file(path)
-        if data == "update":
-            data = self.__processing_file(path)
-        if data:
-            print(data)
+        self.path = path
+        self.__menu()
+        #data = self.__processing_file(path)
+        #if data == "update":
+        #    data = self.__processing_file(path)
+        #if data:
+        #    print(data)
+
+    def __show_menu(self):
+        message = "miniaturizer\n".capitalize()
+        options = Settings.menu_options_list
+        print(message)
+        [print("  {}. ".format(i+1), options[i]) for i in range(len(options))]
+
+    def __menu(self):
+        self.__show_menu()
+        option =  int(input("Choose your option: "))-1
+        options = Settings.menu_options_list
+        if options[option] == "edit":
+            pass
+        if options[option] == "create":
+            self.__create_file()
+        if options[option] == "show info":
+            self.__show_info(self.path)
 
     def __notify(self, text):
         print(":: " + text)
 
-    def __processing_file(self, path):
+    def __show_info(self, path):
         """
         Arguments:
          0) path - path to working directory
@@ -105,21 +132,18 @@ class Cli:
         paths, files = Yaml.parse_yaml_extensions(path)
         filename = ""
         if len(files) == 0:
-            self.__create_file()
-            return "update"
+            print("You don`t have any `yaml` files")
+            return 0
         if len(files) > 0:
-            print("Choose option:")
+            print("Choose limiter:")
             for i in range(len(files)):
                 print("\t{}. {}".format(i+1, files[i]))
-            print("\t{}. Create new limiter".format(len(files)+1))
-            option = int(input("Enter your option: "))
-            if option == (len(files) + 1):
-                self.__create_file()
-                return "update"
-            path = paths[option-1]
-        return open_file(path)
-
-        self.__create_file()
+       #     option = int(input("Enter your option: "))
+       #     if option == (len(files) + 1):
+       #         self.__create_file()
+       #         return "update"
+       #     path = paths[option-1]
+       # return open_file(path)
 
     def __create_file(self):
         self.__notify("Creating file")
