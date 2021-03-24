@@ -1,4 +1,5 @@
 from time import strftime
+from sys import exit
 
 from os import walk
 from os import getcwd
@@ -75,15 +76,15 @@ class Yaml:
         files = [i for i in files if i[len(i)-len(ext):] == ext]
         return paths, files
 
-    def create_file(data, name):
+    def create_file(data, filename):
         """
         Create file with name in lowercase with `.yaml` extension
         Arguments:
             0) data - data that you want to load
             0) name - name of file without extension
         """
-        name = name.lower() + ".yaml"
-        create_file(data, name)
+        filename = filename.lower() + ".yaml"
+        create_file(data, filename)
 
 
 class Dama:
@@ -109,37 +110,49 @@ class Dama:
         "period":period,
         }
 
-    def show_info(self, path):
+    def update_limiter(self, filename, path=""):
         """
         Arguments:
-         0) path - path to working directory
+          0) filename - name of file with extension
+          1) path - path where file is lying
         """
-        paths, files = Yaml.parse_yaml_extensions(path)
-        filename = ""
-        if len(files) == 0:
-            print("You don`t have any `yaml` files")
-            return 0
-        if len(files) > 0:
-            print("Choose limiter:")
-            for i in range(len(files)):
-                print("\t{}. {}".format(i+1, files[i]))
+        data = open_file(filename)
+        date = get_date()
+        if (int(date["day"]) - int(data["day"])) >= data["period"]:
+            data["day"] = date["day"]
+            if (data["limit"] - data["period"]) > 0:
+                data["limit"] = data["limit"] - data["period"]
+        create_file(data, filename)
+    
+    def show_info(self, filename, path=""):
+        data = open_file(filename)
+        show = (
+            "day",
+            "limit",
+            "period",
+            "step",
+        )
+        for i in show:
+            print("{}: {}".format(i.capitalize(), data[i]))
 
 
 class Cli:
     def __init__(self, path):
         self.path = path
-        self.__menu()
-        #data = self.__processing_file(path)
-        #if data == "update":
-        #    data = self.__processing_file(path)
-        #if data:
-        #    print(data)
+        while 1:
+            try:
+                self.__menu()
+            except KeyboardInterrupt:
+                print()
+                self.__notify("Exiting from Miniaturizer")
+                exit()
 
     def __show_menu(self):
         message = "miniaturizer\n".capitalize()
         options = Settings.menu_options_list
         print(message)
-        [print("  {}. ".format(i+1), options[i]) for i in range(len(options))]
+        [print("  {}.".format(i+1), options[i].capitalize()) for i in range(len(options))]
+        print()
 
     def __menu(self):
         self.__show_menu()
@@ -148,40 +161,39 @@ class Cli:
         if options[option] == "edit":
             pass
         if options[option] == "create":
-            #Dama().create_file()
             self.__creating_file()
         if options[option] == "show info":
-            Dama().show_info(self.path)
+            self.__showing_info()
 
     def __creating_file(self):
         self.__notify("Creating file")
         data = Dama().create_file()
         self.__notify("File %s was created" % (
             data["title"].lower() + ".yaml"))
+    
+    def __showing_info(self):
+        """
+        Arguments:
+         0) path - path to working directory
+        """
+        paths, files = Yaml.parse_yaml_extensions(path)
+        filename = ""
+        if len(files) == 0:
+            print("You don`t have any files with `yaml`")
+            return 0
+        if len(files) > 0:
+            print("Choosing limiter:")
+            for i in range(len(files)):
+                print("  {}. {}".format(i+1, files[i]))
+            option = int(input("\nChoose limiter: ")) - 1
+            filename = files[option]
+            Dama().update_limiter(filename)
+            self.__notify("Showing %s" % filename)
+            Dama().show_info(filename)
+            input("\nTo continue push Enter")
 
     def __notify(self, text):
         print(":: " + text)
-
-    #def __show_info(self, path):
-    #    """
-    #    Arguments:
-    #     0) path - path to working directory
-    #    """
-    #    paths, files = Yaml.parse_yaml_extensions(path)
-    #    filename = ""
-    #    if len(files) == 0:
-    #        print("You don`t have any `yaml` files")
-    #        return 0
-    #    if len(files) > 0:
-    #        print("Choose limiter:")
-    #        for i in range(len(files)):
-    #            print("\t{}. {}".format(i+1, files[i]))
-    #        option = int(input("Enter your option: "))
-    #        if option == (len(files) + 1):
-    #            self.__create_file()
-    #            return "update"
-    #        path = paths[option-1]
-    #    return open_file(path)
 
 
 if __name__ == "__main__":
