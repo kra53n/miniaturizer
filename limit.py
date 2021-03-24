@@ -91,7 +91,26 @@ class Dama:
     Dama - data manipulation
     Manipulation with data from `*.yaml` files
     """
-    pass
+    def create_file(self):
+        #Cli.notify("Creating file")
+        data = get_date()
+        data.update(self.setup_config())
+        Yaml.create_file(data, data["title"])
+        return data
+        #Cli.notify("File %s was created" % (
+        #    data["title"].lower() + ".yaml"))
+
+    def setup_config(self):
+        title = input("What title of limit you want? ")
+        limit = int(input("What the maximum in your limit? "))
+        step = int(input("What the step that will reduce your limit? "))
+        period = int(input("What period it will be changed?(days) "))
+        return {
+        "title": title,
+        "limit": limit,
+        "step": step,
+        "period":period,
+        }
 
 
 class Cli:
@@ -117,9 +136,16 @@ class Cli:
         if options[option] == "edit":
             pass
         if options[option] == "create":
-            self.__create_file()
+            #Dama().create_file()
+            self.__creating_file()
         if options[option] == "show info":
             self.__show_info(self.path)
+
+    def __creating_file(self):
+        self.__notify("Creating file")
+        data = Dama().create_file()
+        self.__notify("File %s was created" % (
+            data["title"].lower() + ".yaml"))
 
     def __notify(self, text):
         print(":: " + text)
@@ -144,26 +170,6 @@ class Cli:
        #         return "update"
        #     path = paths[option-1]
        # return open_file(path)
-
-    def __create_file(self):
-        self.__notify("Creating file")
-        data = get_date()
-        data.update(self.__setup_config())
-        Yaml.create_file(data, data["title"])
-        self.__notify("File %s was created" % (
-            data["title"].lower() + ".yaml"))
-
-    def __setup_config(self):
-        title = input("What title of limit you want? ")
-        limit = int(input("What the maximum in your limit? "))
-        step = int(input("What the step that will reduce your limit? "))
-        period = int(input("What period it will be changed?(days) "))
-        return {
-        "title": title,
-        "limit": limit,
-        "step": step,
-        "period":period,
-        }
 
 
 if __name__ == "__main__":
