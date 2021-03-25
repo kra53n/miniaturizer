@@ -135,11 +135,30 @@ class Dama:
         for i in show:
             print("{}: {}".format(i.capitalize(), data[i]))
 
-    def define_changes(filename):
+    def __define_changes(self, filename):
         """
         Identify what changes can be in file
         """
         return open_file(filename).keys()
+
+    def edit(self, filename):
+        data = open_file(filename)
+        # choosing parameter to chage
+        data_keys = self.__define_changes(filename)
+        data_keys = tuple(data_keys)
+        message = "Choose parameter to change:\n"
+        for i in range(len(data_keys)):
+            message += "  {}. {}\n".format(i+1, data_keys[i].capitalize())
+        option = int(input(message + "Your parameter: ")) - 1
+        key = data_keys[option]
+        print("  {}: {}".format(key.capitalize(), data[key]))
+        # working with paremeter
+        parameter = input("On what parameter you want change {}: ".format(
+            key.capitalize()
+        ))
+        parameter = type(data[key])(parameter)
+        data[key] = parameter
+        create_file(data, filename)
 
 
 class Cli:
@@ -188,23 +207,7 @@ class Cli:
     def __editing(self):
         self.__notify("Editing mode")
         filename = self.__choosing_limiter()
-        data = open_file(filename)
-        # choosing parameter to chage
-        data_keys = Dama.define_changes(filename)
-        data_keys = tuple(data_keys)
-        message = "Choose parameter to change:\n"
-        for i in range(len(data_keys)):
-            message += "  {}. {}\n".format(i+1, data_keys[i].capitalize())
-        option = int(input(message + "Your parameter: ")) - 1
-        key = data_keys[option]
-        print("  {}: {}".format(key.capitalize(), data[key]))
-        # working with paremeter
-        parameter = input("On what parameter you want change {}: ".format(
-            key.capitalize()
-        ))
-        parameter = type(data[key])(parameter)
-        data[key] = parameter
-        create_file(data, filename)
+        Dama().edit(filename)
         self.__notify("Parameter was changed")
 
     def __creating_file(self):
