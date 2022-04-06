@@ -31,8 +31,8 @@ def matrix_to_list(matrix):
     return lst
 
 
-class Settings:
-    menu_options_list = (
+class Menu:
+    opts = (
         "edit",
         "create",
         "show info",
@@ -183,7 +183,7 @@ class Cli:
     def __show_menu(self):
         message = self.progname
         print(message)
-        for count, opt in enumerate(Settings.menu_options_list, start=1):
+        for count, opt in enumerate(Menu.opts, start=1):
             print(f" {count}. {opt.capitalize()}")
         print()
 
@@ -191,7 +191,7 @@ class Cli:
         self.__show_menu()
         opt =  int(input("Choose your option: ")) - 1
 
-        match Settings.menu_options_list[opt]:
+        match Menu.opts[opt]:
             case "edit":
                 self.__editing()
             case "create":
