@@ -36,6 +36,7 @@ class Settings:
         "edit",
         "create",
         "show info",
+        "exit",
     )
 
 
@@ -43,6 +44,11 @@ class Yaml:
     """
     Working with yaml file formats
     """
+    ext = ".yaml"
+
+    def __init__(self):
+        self.ext = Yaml.ext
+
     def __parse_files(path):
         """
         Arguments:
@@ -52,8 +58,7 @@ class Yaml:
         skip_dir = (
             ".git",
         )
-        paths = []
-        fls = []
+        paths, fls = [], []
         for root, dirs, files in walk(path):
             skip = False
             for skip_item in skip_dir:
@@ -70,10 +75,9 @@ class Yaml:
         Arguments:
             path - path to directory
         """
-        ext = ".yaml"
         paths, files = Yaml.__parse_files(path)
-        paths = [i for i in paths if i[len(i)-len(ext):] == ext]
-        files = [i for i in files if i[len(i)-len(ext):] == ext]
+        paths = [i for i in paths if i[len(i)-len(Yaml.ext):] == Yaml.ext]
+        files = [i for i in files if i[len(i)-len(Yaml.ext):] == Yaml.ext]
         return paths, files
 
     def create_file(data, filename):
@@ -83,7 +87,7 @@ class Yaml:
             0) data - data that you want to load
             0) name - name of file without extension
         """
-        filename = filename.lower() + ".yaml"
+        filename = filename.lower() + Yaml.ext
         create_file(data, filename)
 
 
@@ -165,13 +169,16 @@ class Cli:
     def __init__(self, path):
         self.path = path
         self.progname = "Miniaturizer"
-        while 1:
+
+        while True:
             try:
                 self.__menu()
             except KeyboardInterrupt:
-                print()
-                self.__notify("Exiting from Miniaturizer")
-                exit()
+                self.__exit()
+
+    def __exit(self):
+        self.__notify("Exit")
+        exit()
 
     def __show_menu(self):
         message = self.progname
@@ -182,28 +189,33 @@ class Cli:
 
     def __menu(self):
         self.__show_menu()
-        option =  int(input("Choose your option: "))-1
-        options = Settings.menu_options_list
-        if options[option] == "edit":
-            self.__editing()
-        if options[option] == "create":
-            self.__creating_file()
-        if options[option] == "show info":
-            self.__showing_info()
+        opt =  int(input("Choose your option: ")) - 1
+
+        match Settings.menu_options_list[opt]:
+            case "edit":
+                self.__editing()
+            case "create":
+                self.__creating_file()
+            case "show info":
+                self.__showing_info()
+            case "exit":
+                self.__exit()
 
     def __choosing_limiter(self):
         paths, files = Yaml.parse_yaml_extensions(path)
         filename = ""
-        if len(files) == 0:
-            print("You don`t have any files with `yaml`")
-            return 0
-        if len(files) > 0:
-            print("Choosing limiter:")
-            for i in range(len(files)):
-                print("  {}. {}".format(i+1, files[i]))
-            option = int(input("\nChoose limiter: ")) - 1
-            filename = files[option]
-            return filename
+
+        match len(files):
+            case 0:
+                print("You don`t have any files with `yaml`")
+                return 0
+            case _:
+                print("Choosing limiter:")
+                for i in range(len(files)):
+                    print("  {}. {}".format(i+1, files[i]))
+                option = int(input("\nChoose limiter: ")) - 1
+                filename = files[option]
+                return filename
 
     def __editing(self):
         self.__notify("Editing mode")
@@ -214,8 +226,8 @@ class Cli:
     def __creating_file(self):
         self.__notify("Creating file")
         data = Dama().create_file()
-        self.__notify("File %s was created" % (
-            data["title"].lower() + ".yaml"))
+        filename = data["title"].lower() + Yaml.ext
+        self.__notify(f"File {filename} was created")
     
     def __showing_info(self):
         """
