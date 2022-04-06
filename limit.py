@@ -10,10 +10,10 @@ from yaml import dump
 
 
 def get_date():
-    date = {}
-    date["day"] = strftime("%d")
-    date["week"] = strftime("%m")
-    return date
+    return {
+        "day": strftime("%d"),
+        "week": strftime("%m"),
+    }
 
 def create_file(data, filename):
     with open(filename, "w") as f:
