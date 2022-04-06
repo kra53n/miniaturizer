@@ -11,8 +11,8 @@ from yaml import dump
 
 def get_date():
     return {
-        "day": strftime("%d"),
-        "week": strftime("%m"),
+        "day": int(strftime("%d")),
+        "month": int(strftime("%m")),
     }
 
 def create_file(data, filename):
@@ -118,7 +118,7 @@ class Dama:
         """
         data = open_file(filename)
         date = get_date()
-        if (int(date["day"]) - int(data["day"])) >= data["period"]:
+        if (date["day"] - data["day"]) >= data["period"]:
             data["day"] = date["day"]
             if (data["limit"] - data["period"]) > 0:
                 data["limit"] = data["limit"] - data["period"]
@@ -164,6 +164,7 @@ class Dama:
 class Cli:
     def __init__(self, path):
         self.path = path
+        self.progname = "Miniaturizer"
         while 1:
             try:
                 self.__menu()
@@ -173,10 +174,10 @@ class Cli:
                 exit()
 
     def __show_menu(self):
-        message = "miniaturizer\n".capitalize()
-        options = Settings.menu_options_list
+        message = self.progname
         print(message)
-        [print("  {}.".format(i+1), options[i].capitalize()) for i in range(len(options))]
+        for count, opt in enumerate(Settings.menu_options_list, start=1):
+            print(f" {count}. {opt.capitalize()}")
         print()
 
     def __menu(self):
