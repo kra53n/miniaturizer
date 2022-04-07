@@ -35,7 +35,7 @@ class Menu:
     opts = (
         "edit",
         "create",
-        "show info",
+        "show files",
         "exit",
     )
 
@@ -103,15 +103,16 @@ class Dama:
         return data
 
     def setup_config(self):
-        title = input("What title of limit you want? ")
-        limit = int(input("What the maximum in your limit? "))
-        step = int(input("What the step that will reduce your limit? "))
-        period = int(input("What period it will be changed?(days) "))
+        title = input("Title: ")
+        limit = int(input("Maximum in limit: "))
+        step = float(input("Reduction step: "))
+        period = int(input("Period(days): "))
+
         return {
-        "title": title,
-        "limit": limit,
-        "step": step,
-        "period":period,
+            "title": title,
+            "limit": limit,
+            "step": step,
+            "period":period,
         }
 
     def update_limiter(self, filename, path=""):
@@ -122,9 +123,9 @@ class Dama:
         """
         data = open_file(filename)
         date = get_date()
-        if (date["day"] - data["day"]) >= data["period"]:
+        if date["day"] - data["day"] >= data["period"]:
             data["day"] = date["day"]
-            if (data["limit"] - data["period"]) > 0:
+            if data["limit"] - data["period"] > 0:
                 data["limit"] = data["limit"] - data["period"]
         create_file(data, filename)
     
@@ -136,8 +137,8 @@ class Dama:
             "period",
             "step",
         )
-        for i in show:
-            print("{}: {}".format(i.capitalize(), data[i]))
+        for elem in show:
+            print("{}: {}".format(elem.capitalize(), data[elem]))
 
     def __define_changes(self, filename):
         """
@@ -213,8 +214,8 @@ class Cli:
                 print("Choosing limiter:")
                 for i in range(len(files)):
                     print("  {}. {}".format(i+1, files[i]))
-                option = int(input("\nChoose limiter: ")) - 1
-                filename = files[option]
+                opt = int(input("\nChoose limiter: ")) - 1
+                filename = files[opt]
                 return filename
 
     def __editing(self):
