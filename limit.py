@@ -1,12 +1,18 @@
+from pathlib import Path
 from time import strftime
-from sys import exit
 
-from os import walk
-from os import getcwd
+from os import walk, getcwd
 import os.path
 
-from yaml import safe_load
-from yaml import dump
+from yaml import safe_load, dump
+
+
+MENU_OPTS = (
+    "edit",
+    "create",
+    "show files",
+    "exit",
+)
 
 
 def get_date():
@@ -15,30 +21,6 @@ def get_date():
         "month": int(strftime("%m")),
     }
 
-def create_file(data, filename):
-    with open(filename, "w") as f:
-        dump(data, f)
-
-def open_file(filename):
-    with open(filename, "r") as f:
-        date = safe_load(f)
-    return date
-
-def matrix_to_list(matrix):
-    lst = []
-    for i in matrix:
-        lst.extend(i)
-    return lst
-
-
-class Menu:
-    opts = (
-        "edit",
-        "create",
-        "show files",
-        "exit",
-    )
-
 
 class Yaml:
     """
@@ -46,8 +28,15 @@ class Yaml:
     """
     ext = ".yaml"
 
-    def __init__(self):
-        self.ext = Yaml.ext
+    @staticmethod
+    def create_file(data, filename):
+        filename = filename if '.yaml' in filename else f'{filename}{Yaml.ext}'
+        with open(filename, "w") as f:
+            dump(data, f)
+
+    @staticmethod
+    def open_file(filename):
+        return safe_load(Path(filename).read_text())
 
     def __parse_files(path):
         """
@@ -58,13 +47,13 @@ class Yaml:
         skip_dir = (
             ".git",
         )
+
         paths, fls = [], []
         for root, dirs, files in walk(path):
-            skip = False
             for skip_item in skip_dir:
                 if skip_item in root[len(path):]:
-                    skip = True
-            if not skip:
+                    break
+            else:
                 for fl in files:
                     paths.append(os.path.join(root, fl))
                     fls.append(fl)
@@ -79,16 +68,6 @@ class Yaml:
         paths = [i for i in paths if i[len(i)-len(Yaml.ext):] == Yaml.ext]
         files = [i for i in files if i[len(i)-len(Yaml.ext):] == Yaml.ext]
         return paths, files
-
-    def create_file(data, filename):
-        """
-        Create file with name in lowercase with `.yaml` extension
-        Arguments:
-            0) data - data that you want to load
-            0) name - name of file without extension
-        """
-        filename = filename.lower() + Yaml.ext
-        create_file(data, filename)
 
 
 class Dama:
@@ -121,22 +100,17 @@ class Dama:
           0) filename - name of file with extension
           1) path - path where file is lying
         """
-        data = open_file(filename)
+        data = Yaml.open_file(filename)
         date = get_date()
         if date["day"] - data["day"] >= data["period"]:
             data["day"] = date["day"]
             if data["limit"] - data["period"] > 0:
                 data["limit"] = data["limit"] - data["period"]
-        create_file(data, filename)
+        Yaml.create_file(data, filename)
     
     def show_info(self, filename, path=""):
-        data = open_file(filename)
-        show = (
-            "day",
-            "limit",
-            "period",
-            "step",
-        )
+        data = Yaml.open_file(filename)
+        show = ("day", "limit", "period", "step")
         for elem in show:
             print("{}: {}".format(elem.capitalize(), data[elem]))
 
@@ -144,26 +118,24 @@ class Dama:
         """
         Identify what changes can be in file
         """
-        return open_file(filename).keys()
+        return Yaml.open_file(filename).keys()
 
     def edit(self, filename):
-        data = open_file(filename)
+        data = Yaml.open_file(filename)
         # choosing parameter to chage
-        data_keys = self.__define_changes(filename)
-        data_keys = tuple(data_keys)
+        data_keys = tuple(self.__define_changes(filename))
         message = "Choose parameter to change:\n"
         for i in range(len(data_keys)):
             message += "  {}. {}\n".format(i+1, data_keys[i].capitalize())
+
         option = int(input(message + "Your parameter: ")) - 1
         key = data_keys[option]
         print("  {}: {}".format(key.capitalize(), data[key]))
         # working with paremeter
-        parameter = input("On what parameter you want change {}: ".format(
-            key.capitalize()
-        ))
+        parameter = input("On what parameter you want change {}: ".format(key.capitalize()))
         parameter = type(data[key])(parameter)
         data[key] = parameter
-        create_file(data, filename)
+        Yaml.create_file(data, filename)
 
 
 class Cli:
@@ -184,7 +156,7 @@ class Cli:
     def __show_menu(self):
         message = self.progname
         print(message)
-        for count, opt in enumerate(Menu.opts, start=1):
+        for count, opt in enumerate(MENU_OPTS, start=1):
             print(f" {count}. {opt.capitalize()}")
         print()
 
@@ -192,7 +164,7 @@ class Cli:
         self.__show_menu()
         opt =  int(input("Choose your option: ")) - 1
 
-        match Menu.opts[opt]:
+        match MENU_OPTS[opt]:
             case "edit":
                 self.__editing()
             case "create":
