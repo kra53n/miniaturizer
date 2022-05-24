@@ -43,19 +43,14 @@ class Yaml:
         Arguments:
             path - path to directory
         """
-        # names of dirs that you want to skip
-        skip_dir = (
-            ".git",
-        )
+        skip_dirs = (".git")
 
+        # add to path and fls paths and files without files of skip_dirs
         paths, fls = [], []
         for root, dirs, files in walk(path):
-            for skip_item in skip_dir:
-                if skip_item in root[len(path):]:
-                    break
-            else:
+            if not any((skip_item in root[len(path):] for skip_item in skip_dirs)):
                 for fl in files:
-                    paths.append(os.path.join(root, fl))
+                    paths.append(str(Path(root) / fl))
                     fls.append(fl)
         return paths, fls
 
