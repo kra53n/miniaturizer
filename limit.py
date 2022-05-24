@@ -210,5 +210,4 @@ class Cli:
 
 
 if __name__ == "__main__":
-    path = getcwd()
-    Cli(path)
+    Cli(getcwd())
