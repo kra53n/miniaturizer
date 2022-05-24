@@ -1,9 +1,6 @@
 from pathlib import Path
 from time import strftime
-
 from os import walk, getcwd
-import os.path
-
 from yaml import safe_load, dump
 
 
