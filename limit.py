@@ -67,13 +67,15 @@ class Dama:
     Dama - data manipulation
     Manipulation with data from `*.yaml` files
     """
-    def create_file(self):
+    @staticmethod
+    def create_file():
         data = get_date()
-        data.update(self.setup_config())
+        data.update(Dama.setup_config())
         Yaml.create_file(data, data["title"])
         return data
 
-    def setup_config(self):
+    @staticmethod
+    def setup_config():
         title = input("Title: ")
         limit = int(input("Maximum in limit: "))
         step = float(input("Reduction step: "))
@@ -86,7 +88,8 @@ class Dama:
             "period":period,
         }
 
-    def update_limiter(self, filename, path=""):
+    @staticmethod
+    def update_limiter(filename, path=""):
         """
         Arguments:
           0) filename - name of file with extension
@@ -100,22 +103,25 @@ class Dama:
                 data["limit"] = data["limit"] - data["period"]
         Yaml.create_file(data, filename)
     
-    def show_info(self, filename, path=""):
+    @staticmethod
+    def show_info(filename, path=""):
         data = Yaml.open_file(filename)
         show = ("day", "limit", "period", "step")
         for elem in show:
             print("{}: {}".format(elem.capitalize(), data[elem]))
 
-    def __define_changes(self, filename):
+    @staticmethod
+    def __define_changes(filename):
         """
         Identify what changes can be in file
         """
         return Yaml.open_file(filename).keys()
 
-    def edit(self, filename):
+    @staticmethod
+    def edit(filename):
         data = Yaml.open_file(filename)
         # choosing parameter to chage
-        data_keys = tuple(self.__define_changes(filename))
+        data_keys = tuple(Dama.__define_changes(filename))
         message = "Choose parameter to change:\n"
         for i in range(len(data_keys)):
             message += "  {}. {}\n".format(i+1, data_keys[i].capitalize())
@@ -167,7 +173,7 @@ class Cli:
                 self.__exit()
 
     def __choosing_limiter(self):
-        paths, files = Yaml.parse_yaml_extensions(path)
+        paths, files = Yaml.parse_yaml_extensions(self.path)
         filename = ""
 
         match len(files):
@@ -185,12 +191,12 @@ class Cli:
     def __editing(self):
         self.__notify("Editing mode")
         filename = self.__choosing_limiter()
-        Dama().edit(filename)
+        Dama.edit(filename)
         self.__notify("Parameter was changed")
 
     def __creating_file(self):
         self.__notify("Creating file")
-        data = Dama().create_file()
+        data = Dama.create_file()
         filename = data["title"].lower() + Yaml.ext
         self.__notify(f"File {filename} was created")
     
@@ -200,9 +206,9 @@ class Cli:
          0) path - path to working directory
         """
         filename = self.__choosing_limiter()
-        Dama().update_limiter(filename)
+        Dama.update_limiter(filename)
         self.__notify("Showing %s" % filename)
-        Dama().show_info(filename)
+        Dama.show_info(filename)
         input("\nTo continue push Enter")
 
     def __notify(self, text):
